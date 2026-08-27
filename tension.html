@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TENSION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --court-deep:#0F3D22;
+    --court:#1C7A44;
+    --court-light:#2F9C5C;
+    --paper:#F7F6EF;
+    --paper-dim:#EDEBDF;
+    --ink:#122318;
+    --ink-soft:#4F6459;
+    --blue:#2B62D9;
+    --blue-deep:#1B3F91;
+    --red:#E1392C;
+    --red-deep:#A32A1F;
+    --gold:#E7B93D;
+    --line:rgba(247,246,239,0.35);
+    --radius-lg:22px;
+    --radius-md:14px;
+    --radius-sm:9px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; animation:none !important;}
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 8%, rgba(255,255,255,0.05), transparent 40%),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 120px),
+      linear-gradient(180deg, var(--court-deep), var(--court) 45%, var(--court-deep));
+    color:var(--paper);
+    font-family:'Inter', system-ui, sans-serif;
+    min-height:100vh;
+    padding:28px 16px 60px;
+  }
+  .app{max-width:1100px; margin:0 auto;}
+  .display{font-family:'Bebas Neue', sans-serif; letter-spacing:0.04em;}
+
+  /* ---------- Header ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px; margin-bottom:28px; flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:14px;}
+  .brand-mark{
+    width:46px; height:46px; border-radius:12px; background:var(--paper);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    box-shadow:0 4px 0 rgba(0,0,0,0.18);
+  }
+  .brand-mark svg{width:28px; height:28px;}
+  .brand h1{font-size:30px; margin:0; line-height:1; color:var(--paper);}
+  .brand p{margin:4px 0 0; font-size:12.5px; color:rgba(247,246,239,0.65); letter-spacing:0.03em;}
+  .reset-link{
+    background:transparent; border:1.5px solid rgba(247,246,239,0.4); color:var(--paper);
+    font:600 13px 'Inter'; padding:9px 16px; border-radius:100px; cursor:pointer;
+    transition:background 0.15s, border-color 0.15s;
+  }
+  .reset-link:hover{background:rgba(247,246,239,0.1); border-color:var(--paper);}
+  .reset-link.confirming{background:var(--red); border-color:var(--red-deep);}
+
+  /* ---------- Cards (general) ---------- */
+  .card{
+    background:var(--paper); color:var(--ink); border-radius:var(--radius-lg);
+    padding:24px; box-shadow:0 10px 0 rgba(0,0,0,0.14);
+  }
+  h2.section-title{
+    font-family:'Bebas Neue'; font-size:22px; letter-spacing:0.03em; margin:0 0 14px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .hint{font-size:12.5px; color:var(--ink-soft); margin:6px 0 0;}
+  input:focus-visible, button:focus-visible, [tabindex]:focus-visible{
+    outline:3px solid var(--gold); outline-offset:2px;
+  }
+
+  /* ---------- Setup panel ---------- */
+  #setupPanel{display:grid; gap:18px;}
+  .setup-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  @media (max-width:760px){.setup-grid{grid-template-columns:1fr;}}
+
+  .player-input-row{display:flex; gap:8px;}
+  .player-input-row input{
+    flex:1; padding:11px 14px; border-radius:var(--radius-sm); border:1.5px solid var(--paper-dim);
+    background:#fff; font:600 15px 'Inter'; color:var(--ink);
+  }
+  .player-input-row button{
+    background:var(--court); color:#fff; border:none; border-radius:var(--radius-sm);
+    padding:0 18px; font:700 14px 'Inter'; cursor:pointer;
+  }
+  .player-input-row button:hover{background:var(--court-light);}
+  .player-list{list-style:none; margin:12px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:8px;}
+  .player-chip{
+    display:flex; align-items:center; gap:8px; background:var(--paper-dim);
+    padding:7px 8px 7px 14px; border-radius:100px; font-weight:700; font-size:13.5px;
+  }
+  .player-chip button{
+    background:var(--ink); color:var(--paper); border:none; width:20px; height:20px;
+    border-radius:50%; cursor:pointer; font-size:12px; line-height:1; display:flex;
+    align-items:center; justify-content:center;
+  }
+  .error-text{color:var(--red-deep); font-size:12.5px; font-weight:600; min-height:16px; margin-top:8px;}
+
+  .format-options{display:grid; gap:10px;}
+  .format-option{
+    border:2px solid var(--paper-dim); border-radius:var(--radius-md); padding:12px 14px;
+    cursor:pointer; transition:border-color 0.15s;
+  }
+  .format-option.selected{border-color:var(--court);}
+  .format-option label{display:flex; align-items:center; gap:9px; font-weight:700; font-size:14.5px; cursor:pointer;}
+  .format-option .fields{display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;}
+  .field-mini{display:flex; flex-direction:column; gap:4px;}
+  .field-mini span{font-size:11px; color:var(--ink-soft); font-weight:600; text-transform:uppercase; letter-spacing:0.03em;}
+  .field-mini input{
+    width:88px; padding:8px 10px; border-radius:8px; border:1.5px solid var(--paper-dim);
+    font:700 14px 'Inter'; color:var(--ink);
+  }
+  .format-target{font-size:12.5px; color:var(--court); font-weight:700; margin-top:8px;}
+
+  .generate-btn{
+    background:var(--ink); color:var(--paper); border:none; border-radius:100px;
+    padding:14px 22px; font:800 15px 'Inter'; letter-spacing:0.02em; cursor:pointer;
+    box-shadow:0 5px 0 rgba(0,0,0,0.25); transition:transform 0.1s;
+  }
+  .generate-btn:hover{transform:translateY(-1px);}
+  .generate-btn:disabled{opacity:0.45; cursor:not-allowed; box-shadow:none;}
+
+  /* ---------- Game layout ---------- */
+  .layout{display:grid; grid-template-columns:1.55fr 1fr; gap:18px; align-items:start;}
+  @media (max-width:860px){.layout{grid-template-columns:1fr;}}
+
+  .panel-actions{display:flex; justify-content:flex-end; margin-bottom:10px;}
+  .end-btn{
+    background:transparent; border:1.5px solid rgba(247,246,239,0.5); color:var(--paper);
+    font:700 12.5px 'Inter'; padding:8px 15px; border-radius:100px; cursor:pointer;
+    transition:background 0.15s, border-color 0.15s;
+  }
+  .end-btn:hover{background:rgba(247,246,239,0.12);}
+  .end-btn.confirming{background:var(--red); border-color:var(--red-deep);}
+  .finished-tag{
+    background:var(--gold); color:var(--ink); font:700 12.5px 'Inter';
+    padding:8px 15px; border-radius:100px;
+  }
+
+  .round-nav{display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px;}
+  .round-tab{
+    flex-shrink:0; background:rgba(247,246,239,0.14); color:var(--paper); border:none;
+    padding:9px 16px; border-radius:100px; font:700 13px 'Inter'; cursor:pointer;
+    display:flex; align-items:center; gap:6px; transition:background 0.15s;
+  }
+  .round-tab.active{background:var(--paper); color:var(--ink);}
+  .round-tab.locked{opacity:0.4; cursor:not-allowed;}
+  .round-tab:not(.locked):not(.active):hover{background:rgba(247,246,239,0.26);}
+
+  .bye-banner{
+    background:rgba(247,246,239,0.9); color:var(--ink); border-radius:var(--radius-md);
+    padding:10px 16px; font-size:13.5px; font-weight:700; margin-bottom:14px;
+    display:flex; align-items:center; gap:8px;
+  }
+
+  .match-card{
+    background:var(--paper); border-radius:var(--radius-lg); padding:16px; margin-bottom:16px;
+    box-shadow:0 8px 0 rgba(0,0,0,0.14); position:relative;
+  }
+  .match-card .rings{position:absolute; top:10px; left:50%; transform:translateX(-50%); display:flex; gap:26px;}
+  .match-card .rings span{width:9px; height:9px; border-radius:50%; background:var(--paper-dim); border:2px solid #fff; box-shadow:inset 0 0 0 2px var(--court-deep);}
+  .match-body{display:flex; align-items:stretch; gap:10px; margin-top:14px;}
+  .side{
+    flex:1; border-radius:var(--radius-md); padding:14px 10px; text-align:center;
+    display:flex; flex-direction:column; gap:8px; align-items:center;
+  }
+  .side.blue{background:linear-gradient(160deg, var(--blue), var(--blue-deep));}
+  .side.red{background:linear-gradient(160deg, var(--red), var(--red-deep));}
+  .side .pname{color:#fff; font-weight:800; font-size:13.5px; min-height:18px; display:flex; align-items:center; gap:5px;}
+  .side.loser{opacity:0.55;}
+  .side input[type=number]{
+    width:64px; text-align:center; font-family:'Bebas Neue'; font-size:34px;
+    border:none; border-radius:10px; padding:4px 0; color:var(--ink); background:#fff;
+    -moz-appearance:textfield;
+  }
+  .side input[type=number]::-webkit-outer-spin-button,
+  .side input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+  .vs-divider{
+    width:26px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft); font-size:11px; font-weight:800; position:relative;
+  }
+  .vs-divider .ball{width:12px; height:12px; border-radius:50%; background:#CFE04A; box-shadow:0 0 0 3px var(--paper), 0 0 0 4px var(--paper-dim);}
+
+  .sets-row{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:2px;}
+  .set-pair{display:flex; flex-direction:column; align-items:center; gap:4px;}
+  .set-pair span{font-size:10px; font-weight:700; color:var(--ink-soft);}
+  .set-pair .set-inputs{display:flex; gap:4px; align-items:center;}
+  .set-pair input{width:38px; padding:5px 0; font:700 15px 'Inter'; text-align:center; border-radius:6px; border:1.5px solid var(--paper-dim); color:var(--ink);}
+
+  .match-footer{display:flex; align-items:center; justify-content:space-between; margin-top:12px; gap:10px; flex-wrap:wrap;}
+  .save-btn{
+    background:var(--court); color:#fff; border:none; border-radius:100px;
+    padding:9px 18px; font:700 13px 'Inter'; cursor:pointer;
+  }
+  .save-btn:hover{background:var(--court-light);}
+  .match-note{font-size:12px; color:var(--ink-soft); font-weight:600;}
+  .match-note.warn{color:var(--red-deep);}
+  .trophy-tag{color:var(--gold); font-size:15px;}
+
+  .round-actions{margin-top:6px;}
+  .advance-btn{
+    width:100%; background:var(--gold); color:var(--ink); border:none; border-radius:var(--radius-md);
+    padding:14px; font:800 15px 'Inter'; letter-spacing:0.02em; cursor:pointer;
+    box-shadow:0 5px 0 rgba(0,0,0,0.2);
+  }
+  .advance-btn:hover{filter:brightness(1.04);}
+  .finish-banner{
+    background:var(--ink); color:var(--paper); border-radius:var(--radius-md);
+    padding:16px; text-align:center; font-weight:800; font-family:'Bebas Neue';
+    font-size:20px; letter-spacing:0.03em;
+  }
+
+  /* ---------- Leaderboard ---------- */
+  .leaderboard-card{position:sticky; top:20px;}
+  .champion-banner{
+    background:linear-gradient(160deg, var(--gold), #C99420); color:var(--ink);
+    border-radius:var(--radius-md); padding:12px 14px; font-weight:800; margin-bottom:14px;
+    display:flex; align-items:center; gap:8px; font-size:14px;
+  }
+  table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  thead th{
+    text-align:center; font-size:10px; text-transform:uppercase; letter-spacing:0.03em;
+    color:var(--ink-soft); padding:6px 4px; border-bottom:2px solid var(--paper-dim);
+  }
+  thead th:first-child, tbody td:first-child{text-align:left;}
+  tbody td{padding:9px 4px; text-align:center; border-bottom:1px solid var(--paper-dim); font-weight:700;}
+  tbody tr:last-child td{border-bottom:none;}
+  .rank-cell{display:flex; align-items:center; gap:6px; font-weight:800;}
+  .rank-num{
+    width:20px; height:20px; border-radius:50%; background:var(--paper-dim); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;
+  }
+  .rank-num.gold{background:var(--gold); color:var(--ink);}
+  .empty-note{font-size:12.5px; color:var(--ink-soft); text-align:center; padding:18px 4px;}
+
+  .visually-hidden{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" fill="#CFE04A" stroke="#0F3D22" stroke-width="1.2"/>
+          <path d="M4.8 5 C9.3 8.2 9.3 15.8 4.8 19" stroke="#F7F6EF" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+          <path d="M19.2 5 C14.7 8.2 14.7 15.8 19.2 19" stroke="#F7F6EF" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <h1>TENSION</h1>
+        <p>Penjadwalan &amp; skor round-robin yang adil dan presisi</p>
+      </div>
+    </div>
+    <button class="reset-link" id="resetBtn">Mulai Turnamen Baru</button>
+  </div>
+
+  <section id="setupPanel" class="card"></section>
+
+  <section id="gameLayout" class="layout" hidden>
+    <div>
+      <div class="panel-actions" id="panelActions"></div>
+      <div class="round-nav" id="roundNav"></div>
+      <div id="matchesContainer"></div>
+      <div class="round-actions" id="roundActions"></div>
+    </div>
+    <div class="card leaderboard-card">
+      <h2 class="section-title">🏆 Klasemen</h2>
+      <div id="leaderboardBody"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------------- State ----------------
+  const state = {
+    players: ["Haryo", "Dewanto", "Izhar"],
+    format: { type: "bestOf", n: 7, winSets: 1, winGames: 6 },
+    schedule: [],
+    currentRoundIndex: 0,
+    viewedRoundIndex: 0,
+    scheduleGenerated: false,
+    finished: false,
+    playerError: ""
+  };
+
+  const setupPanel = document.getElementById("setupPanel");
+  const gameLayout = document.getElementById("gameLayout");
+  const panelActions = document.getElementById("panelActions");
+  const roundNav = document.getElementById("roundNav");
+  const matchesContainer = document.getElementById("matchesContainer");
+  const roundActions = document.getElementById("roundActions");
+  const leaderboardBody = document.getElementById("leaderboardBody");
+  const resetBtn = document.getElementById("resetBtn");
+
+  // ---------------- Round robin (circle method, bye-aware) ----------------
+  function buildRoundRobin(players){
+    let arr = [...players];
+    const odd = arr.length % 2 !== 0;
+    if (arr.length > 0){
+      const last = arr[arr.length - 1];
+      const rest = arr.slice(0, arr.length - 1);
+      arr = [last, ...rest];
+    }
+    if (odd) arr.push("BYE");
+    const n = arr.length;
+    if (n < 2) return [];
+    const totalRounds = n - 1;
+    const rounds = [];
+    let current = [...arr];
+    for (let r = 0; r < totalRounds; r++){
+      const matches = [];
+      let bye = null;
+      for (let i = 0; i < n / 2; i++){
+        const a = current[i];
+        const b = current[n - 1 - i];
+        if (a === "BYE") bye = b;
+        else if (b === "BYE") bye = a;
+        else matches.push([a, b]);
+      }
+      rounds.push({ matches, bye });
+      const fixed = current[0];
+      const rest = current.slice(1);
+      rest.unshift(rest.pop());
+      current = [fixed, ...rest];
+    }
+    return rounds;
+  }
+
+  function makeSetsArray(){
+    const count = Math.max(1, state.format.winSets * 2 - 1);
+    return Array.from({ length: count }, () => ({ a: null, b: null }));
+  }
+
+  function generateSchedule(){
+    if (state.players.length < 2){
+      state.playerError = "Minimal 2 pemain diperlukan untuk membuat jadwal.";
+      renderSetup();
+      return;
+    }
+    const rounds = buildRoundRobin(state.players);
+    state.schedule = rounds.map((r, ri) => ({
+      matches: r.matches.map((pair, mi) => ({
+        id: "r" + ri + "m" + mi,
+        a: pair[0],
+        b: pair[1],
+        scoreA: null,
+        scoreB: null,
+        draftA: null,
+        draftB: null,
+        error: null,
+        sets: makeSetsArray()
+      })),
+      bye: r.bye
+    }));
+    state.currentRoundIndex = 0;
+    state.viewedRoundIndex = 0;
+    state.scheduleGenerated = true;
+    state.finished = false;
+    renderAll();
+  }
+
+  // Appends one more full round-robin cycle (same pairings, fresh scores) so the
+  // tournament keeps rolling instead of stopping after everyone has played once.
+  function appendNewCycle(){
+    const rounds = buildRoundRobin(state.players);
+    const offset = state.schedule.length;
+    rounds.forEach((r, ri) => {
+      state.schedule.push({
+        matches: r.matches.map((pair, mi) => ({
+          id: "r" + (offset + ri) + "m" + mi,
+          a: pair[0],
+          b: pair[1],
+          scoreA: null,
+          scoreB: null,
+          draftA: null,
+          draftB: null,
+          error: null,
+          sets: makeSetsArray()
+        })),
+        bye: r.bye
+      });
+    });
+  }
+
+  // ---------------- Match logic ----------------
+  function getSetWins(m){
+    let winsA = 0, winsB = 0;
+    m.sets.forEach(s => {
+      if (s.a != null && s.b != null && s.a !== s.b){
+        if (s.a > s.b) winsA++; else winsB++;
+      }
+    });
+    return { winsA, winsB };
+  }
+
+  function getMatchWinner(m){
+    if (state.format.type === "bestOf"){
+      if (m.scoreA == null || m.scoreB == null || m.scoreA === m.scoreB) return null;
+      return m.scoreA > m.scoreB ? "a" : "b";
+    } else {
+      const { winsA, winsB } = getSetWins(m);
+      if (winsA >= state.format.winSets) return "a";
+      if (winsB >= state.format.winSets) return "b";
+      return null;
+    }
+  }
+
+  function matchTotals(m){
+    // returns games for/against each side, for leaderboard purposes
+    if (state.format.type === "bestOf"){
+      return { gA: m.scoreA || 0, gB: m.scoreB || 0 };
+    }
+    let gA = 0, gB = 0;
+    m.sets.forEach(s => { if (s.a != null) gA += s.a; if (s.b != null) gB += s.b; });
+    return { gA, gB };
+  }
+
+  function isRoundComplete(idx){
+    const round = state.schedule[idx];
+    if (!round || round.matches.length === 0) return true;
+    return round.matches.every(m => getMatchWinner(m) !== null);
+  }
+
+  function bestOfTarget(){ return Math.ceil(state.format.n / 2); }
+
+  // ---------------- Leaderboard ----------------
+  function computeLeaderboard(){
+    const stats = {};
+    state.players.forEach(p => { stats[p] = { name: p, played: 0, win: 0, loss: 0, gf: 0, ga: 0 }; });
+    state.schedule.forEach(round => {
+      round.matches.forEach(m => {
+        const w = getMatchWinner(m);
+        if (!w) return;
+        const { gA, gB } = matchTotals(m);
+        if (!stats[m.a] || !stats[m.b]) return;
+        stats[m.a].played++; stats[m.b].played++;
+        stats[m.a].gf += gA; stats[m.a].ga += gB;
+        stats[m.b].gf += gB; stats[m.b].ga += gA;
+        if (w === "a"){ stats[m.a].win++; stats[m.b].loss++; }
+        else { stats[m.b].win++; stats[m.a].loss++; }
+      });
+    });
+    return Object.values(stats).sort((x, y) => {
+      if (y.win !== x.win) return y.win - x.win;
+      const diffX = x.gf - x.ga, diffY = y.gf - y.ga;
+      if (diffY !== diffX) return diffY - diffX;
+      if (y.gf !== x.gf) return y.gf - x.gf;
+      return x.name.localeCompare(y.name);
+    });
+  }
+
+  function tournamentFinished(){
+    return state.scheduleGenerated && state.finished;
+  }
+
+  // ---------------- Render: Setup ----------------
+  function renderSetup(){
+    const f = state.format;
+    setupPanel.innerHTML = `
+      <h2 class="section-title">🎾 Pendaftaran &amp; Format</h2>
+      <div class="setup-grid">
+        <div>
+          <div class="field-mini" style="margin-bottom:8px;"><span>Daftar Pemain</span></div>
+          <div class="player-input-row">
+            <input type="text" id="playerInput" placeholder="Nama pemain..." aria-label="Nama pemain baru">
+            <button id="addPlayerBtn" type="button">Tambah</button>
+          </div>
+          <ul class="player-list">
+            ${state.players.map((p, i) => `
+              <li class="player-chip">${escapeHtml(p)}
+                <button type="button" data-remove-player="${i}" aria-label="Hapus ${escapeHtml(p)}">✕</button>
+              </li>`).join("")}
+          </ul>
+          <p class="error-text">${state.playerError || ""}</p>
+        </div>
+        <div>
+          <div class="field-mini" style="margin-bottom:8px;"><span>Format Pertandingan</span></div>
+          <div class="format-options">
+            <div class="format-option ${f.type === "bestOf" ? "selected" : ""}" data-format-type="bestOf">
+              <label><input type="radio" name="fmt" ${f.type === "bestOf" ? "checked" : ""} data-format-radio="bestOf"> Best of # Games</label>
+              <div class="fields">
+                <div class="field-mini"><span>Jumlah Game</span>
+                  <input type="number" id="bestOfN" min="1" step="2" value="${f.n}" ${f.type !== "bestOf" ? "disabled" : ""}></div>
+              </div>
+              <p class="format-target" id="bestOfTargetText">${f.type === "bestOf" ? `Menang: pemain pertama meraih ${bestOfTarget()} game.` : ""}</p>
+            </div>
+            <div class="format-option ${f.type === "setGame" ? "selected" : ""}" data-format-type="setGame">
+              <label><input type="radio" name="fmt" ${f.type === "setGame" ? "checked" : ""} data-format-radio="setGame"> Set &amp; Game Fix</label>
+              <div class="fields">
+                <div class="field-mini"><span>Set untuk Menang</span>
+                  <input type="number" id="winSets" min="1" value="${f.winSets}" ${f.type !== "setGame" ? "disabled" : ""}></div>
+                <div class="field-mini"><span>Game / Set</span>
+                  <input type="number" id="winGames" min="1" value="${f.winGames}" ${f.type !== "setGame" ? "disabled" : ""}></div>
+              </div>
+              <p class="format-target">${f.type === "setGame" ? `Menang match: raih ${f.winSets} set, tiap set menang di ${f.winGames} game.` : ""}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="generate-btn" id="generateBtn" type="button" ${state.players.length < 2 ? "disabled" : ""}>
+        Buat Jadwal Round 1 →
+      </button>
+      <p class="hint">${state.players.length} pemain terdaftar · ${state.players.length % 2 !== 0 ? "jumlah ganjil, sistem bye aktif" : "jumlah genap, tanpa bye"}</p>
+    `;
+
+    document.getElementById("addPlayerBtn").onclick = addPlayerFromInput;
+    document.getElementById("playerInput").onkeydown = e => { if (e.key === "Enter"){ e.preventDefault(); addPlayerFromInput(); } };
+    setupPanel.querySelectorAll("[data-remove-player]").forEach(btn => {
+      btn.onclick = () => { state.players.splice(+btn.dataset.removePlayer, 1); state.playerError = ""; renderSetup(); };
+    });
+    setupPanel.querySelectorAll("[data-format-radio]").forEach(r => {
+      r.onchange = () => { state.format.type = r.dataset.formatRadio; renderSetup(); };
+    });
+    setupPanel.querySelectorAll("[data-format-type]").forEach(box => {
+      box.onclick = (e) => {
+        if (e.target.tagName === "INPUT" && e.target.type === "number") return;
+        state.format.type = box.dataset.formatType; renderSetup();
+      };
+    });
+    const bestOfN = document.getElementById("bestOfN");
+    if (bestOfN) bestOfN.oninput = () => {
+      state.format.n = Math.max(1, parseInt(bestOfN.value || "1", 10));
+      document.getElementById("bestOfTargetText").textContent = `Menang: pemain pertama meraih ${bestOfTarget()} game.`;
+    };
+    const winSets = document.getElementById("winSets");
+    const winGames = document.getElementById("winGames");
+    if (winSets) winSets.oninput = () => { state.format.winSets = Math.max(1, parseInt(winSets.value || "1", 10)); };
+    if (winGames) winGames.oninput = () => { state.format.winGames = Math.max(1, parseInt(winGames.value || "1", 10)); };
+
+    document.getElementById("generateBtn").onclick = generateSchedule;
+  }
+
+  function addPlayerFromInput(){
+    const input = document.getElementById("playerInput");
+    const name = input.value.trim();
+    if (!name){ state.playerError = "Nama pemain tidak boleh kosong."; renderSetup(); return; }
+    if (state.players.some(p => p.toLowerCase() === name.toLowerCase())){
+      state.playerError = "Nama pemain sudah terdaftar."; renderSetup(); return;
+    }
+    state.players.push(name);
+    state.playerError = "";
+    renderSetup();
+    const fresh = document.getElementById("playerInput");
+    if (fresh) fresh.focus();
+  }
+
+  // ---------------- Render: Round nav ----------------
+  function renderRoundNav(){
+    roundNav.innerHTML = state.schedule.map((round, idx) => {
+      const locked = idx > state.currentRoundIndex;
+      const active = idx === state.viewedRoundIndex;
+      const complete = isRoundComplete(idx) && round.matches.length > 0;
+      return `<button type="button" class="round-tab ${active ? "active" : ""} ${locked ? "locked" : ""}"
+        data-round-tab="${idx}" ${locked ? "disabled" : ""}>
+        Round ${idx + 1} ${complete ? "✓" : (locked ? "🔒" : "")}
+      </button>`;
+    }).join("");
+    roundNav.querySelectorAll("[data-round-tab]").forEach(btn => {
+      btn.onclick = () => { state.viewedRoundIndex = +btn.dataset.roundTab; renderGamePanel(); };
+    });
+  }
+
+  // ---------------- Render: matches ----------------
+  function renderMatches(){
+    const round = state.schedule[state.viewedRoundIndex];
+    let html = "";
+    if (round.bye){
+      html += `<div class="bye-banner">💤 <span>${escapeHtml(round.bye)} mendapat BYE (istirahat) di round ini.</span></div>`;
+    }
+    if (round.matches.length === 0){
+      html += `<p class="empty-note">Tidak ada pertandingan pada round ini.</p>`;
+    }
+    round.matches.forEach(m => {
+      const winner = getMatchWinner(m);
+      html += `<div class="match-card" data-match-id="${m.id}">
+        <div class="rings"><span></span><span></span></div>
+        <div class="match-body">
+          <div class="side blue ${winner === "b" ? "loser" : ""}">
+            <div class="pname">${winner === "a" ? '<span class="trophy-tag">🏆</span>' : ""}${escapeHtml(m.a)}</div>
+            ${renderScoreInput(m, "a")}
+          </div>
+          <div class="vs-divider"><div class="ball"></div></div>
+          <div class="side red ${winner === "a" ? "loser" : ""}">
+            <div class="pname">${winner === "b" ? '<span class="trophy-tag">🏆</span>' : ""}${escapeHtml(m.b)}</div>
+            ${renderScoreInput(m, "b")}
+          </div>
+        </div>
+        <div class="match-footer">
+          <span class="match-note ${matchNoteWarn(m) ? "warn" : ""}">${matchNoteText(m)}</span>
+          <button type="button" class="save-btn" data-save-match="${m.id}" ${state.finished ? "disabled" : ""}>${state.finished ? "Terkunci" : "Simpan Skor"}</button>
+        </div>
+      </div>`;
+    });
+    matchesContainer.innerHTML = html;
+
+    matchesContainer.querySelectorAll("[data-save-match]").forEach(btn => {
+      btn.onclick = () => saveMatch(btn.dataset.saveMatch);
+    });
+  }
+
+  function renderScoreInput(m, side){
+    const disabled = state.finished ? "disabled" : "";
+    if (state.format.type === "bestOf"){
+      const saved = side === "a" ? m.scoreA : m.scoreB;
+      const draft = side === "a" ? m.draftA : m.draftB;
+      const val = draft != null ? draft : saved;
+      return `<input type="number" min="0" max="${state.format.n}" inputmode="numeric" data-score-field="${side}" data-match="${m.id}"
+        value="${val == null ? "" : val}" ${disabled} aria-label="Skor game ${side === "a" ? escapeHtml(m.a) : escapeHtml(m.b)}">`;
+    }
+    let html = `<div class="sets-row">`;
+    m.sets.forEach((s, si) => {
+      const val = side === "a" ? s.a : s.b;
+      html += `<div class="set-pair"><span>Set ${si + 1}</span>
+        <div class="set-inputs">
+          <input type="number" min="0" data-set-field="${side}" data-set-index="${si}" data-match="${m.id}"
+            value="${val == null ? "" : val}" ${disabled} aria-label="Set ${si + 1} skor ${side === "a" ? escapeHtml(m.a) : escapeHtml(m.b)}">
+        </div></div>`;
+    });
+    html += `</div>`;
+    return html;
+  }
+
+  function matchNoteText(m){
+    if (m.error) return m.error;
+    if (state.format.type === "bestOf"){
+      const target = bestOfTarget();
+      const w = getMatchWinner(m);
+      if (!w) return `Target menang: ${target} game, total skor maks ${state.format.n} (Best of ${state.format.n}).`;
+      if ((w === "a" ? m.scoreA : m.scoreB) < target) return "Tersimpan — skor di bawah target normal, tetap dicatat.";
+      return "Pertandingan selesai.";
+    } else {
+      const w = getMatchWinner(m);
+      if (!w) return `Target menang: ${state.format.winSets} set (tiap set: ${state.format.winGames} game).`;
+      return "Pertandingan selesai.";
+    }
+  }
+  function matchNoteWarn(m){
+    if (m.error) return true;
+    if (state.format.type !== "bestOf") return false;
+    const w = getMatchWinner(m);
+    if (!w) return false;
+    return (w === "a" ? m.scoreA : m.scoreB) < bestOfTarget();
+  }
+
+  function saveMatch(matchId){
+    if (state.finished) return;
+    const round = state.schedule[state.viewedRoundIndex];
+    const m = round.matches.find(x => x.id === matchId);
+    if (!m) return;
+    if (state.format.type === "bestOf"){
+      const inputA = matchesContainer.querySelector(`[data-score-field="a"][data-match="${matchId}"]`);
+      const inputB = matchesContainer.querySelector(`[data-score-field="b"][data-match="${matchId}"]`);
+      const a = inputA.value === "" ? null : Math.max(0, parseInt(inputA.value, 10));
+      const b = inputB.value === "" ? null : Math.max(0, parseInt(inputB.value, 10));
+      m.draftA = a; m.draftB = b;
+      if (a != null && b != null && (a + b) > state.format.n){
+        m.error = `Total skor ${a}+${b} = ${a + b} melebihi batas Best of ${state.format.n} (maksimal ${state.format.n}).`;
+        renderGamePanel();
+        return;
+      }
+      m.error = null;
+      m.scoreA = a; m.scoreB = b;
+      m.draftA = null; m.draftB = null;
+    } else {
+      m.sets.forEach((s, si) => {
+        const inA = matchesContainer.querySelector(`[data-set-field="a"][data-set-index="${si}"][data-match="${matchId}"]`);
+        const inB = matchesContainer.querySelector(`[data-set-field="b"][data-set-index="${si}"][data-match="${matchId}"]`);
+        s.a = inA.value === "" ? null : Math.max(0, parseInt(inA.value, 10));
+        s.b = inB.value === "" ? null : Math.max(0, parseInt(inB.value, 10));
+      });
+      m.error = null;
+    }
+    renderGamePanel();
+  }
+
+  // ---------------- Render: round actions ----------------
+  function renderRoundActions(){
+    if (state.finished){
+      const rows = computeLeaderboard();
+      const champion = rows.length ? rows[0].name : "-";
+      roundActions.innerHTML = `<div class="finish-banner">🏆 TURNAMEN SELESAI — Juara: ${escapeHtml(champion)}</div>`;
+      return;
+    }
+    const isFurthest = state.viewedRoundIndex === state.currentRoundIndex;
+    const roundDone = isRoundComplete(state.currentRoundIndex);
+
+    if (isFurthest && roundDone){
+      roundActions.innerHTML = `<button type="button" class="advance-btn" id="advanceBtn">Lanjut ke Round ${state.currentRoundIndex + 2} →</button>`;
+      document.getElementById("advanceBtn").onclick = () => {
+        state.currentRoundIndex++;
+        if (state.currentRoundIndex >= state.schedule.length) appendNewCycle();
+        state.viewedRoundIndex = state.currentRoundIndex;
+        renderGamePanel();
+      };
+    } else if (isFurthest && !roundDone){
+      roundActions.innerHTML = `<p class="hint" style="color:rgba(247,246,239,0.75);">Masukkan &amp; simpan semua skor pada round ini untuk membuka round berikutnya — atau tekan "Selesaikan Turnamen" kapan saja.</p>`;
+    } else {
+      roundActions.innerHTML = "";
+    }
+  }
+
+  // ---------------- Render: panel actions (End Tournament) ----------------
+  let confirmingEnd = false;
+  function renderPanelActions(){
+    if (state.finished){
+      panelActions.innerHTML = `<span class="finished-tag">🏁 Turnamen telah diselesaikan</span>`;
+      return;
+    }
+    panelActions.innerHTML = `<button type="button" class="end-btn" id="endTournamentBtn">🏁 Selesaikan Turnamen</button>`;
+    const btn = document.getElementById("endTournamentBtn");
+    btn.onclick = () => {
+      if (!confirmingEnd){
+        confirmingEnd = true;
+        btn.textContent = "Yakin? Klik lagi untuk selesai";
+        btn.classList.add("confirming");
+        setTimeout(() => {
+          confirmingEnd = false;
+          const stillThere = document.getElementById("endTournamentBtn");
+          if (stillThere){
+            stillThere.textContent = "🏁 Selesaikan Turnamen";
+            stillThere.classList.remove("confirming");
+          }
+        }, 3000);
+        return;
+      }
+      state.finished = true;
+      confirmingEnd = false;
+      renderGamePanel();
+    };
+  }
+
+  // ---------------- Render: leaderboard ----------------
+  function renderLeaderboard(){
+    const rows = computeLeaderboard();
+    const finished = tournamentFinished();
+    let html = "";
+    if (finished && rows.length){
+      html += `<div class="champion-banner">🏆 Juara Turnamen: ${escapeHtml(rows[0].name)}</div>`;
+    }
+    html += `<table>
+      <thead><tr>
+        <th>Pemain</th><th>Main</th><th>M</th><th>K</th><th>G+</th><th>G-</th><th>Sel.</th>
+      </tr></thead>
+      <tbody>
+        ${rows.map((r, i) => `<tr>
+          <td><div class="rank-cell"><span class="rank-num ${i === 0 && r.played > 0 ? "gold" : ""}">${i + 1}</span>${escapeHtml(r.name)}</div></td>
+          <td>${r.played}</td><td>${r.win}</td><td>${r.loss}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf - r.ga >= 0 ? "+" : ""}${r.gf - r.ga}</td>
+        </tr>`).join("")}
+      </tbody>
+    </table>`;
+    leaderboardBody.innerHTML = html;
+  }
+
+  // ---------------- Top-level render ----------------
+  function renderGamePanel(){
+    renderPanelActions();
+    renderRoundNav();
+    renderMatches();
+    renderRoundActions();
+    renderLeaderboard();
+  }
+
+  function renderAll(){
+    if (!state.scheduleGenerated){
+      setupPanel.hidden = false;
+      gameLayout.hidden = true;
+      renderSetup();
+    } else {
+      setupPanel.hidden = true;
+      gameLayout.hidden = false;
+      renderGamePanel();
+    }
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  // ---------------- Reset ----------------
+  let confirmingReset = false;
+  resetBtn.onclick = () => {
+    if (!confirmingReset){
+      confirmingReset = true;
+      resetBtn.textContent = "Yakin? Klik lagi untuk reset";
+      resetBtn.classList.add("confirming");
+      setTimeout(() => {
+        confirmingReset = false;
+        resetBtn.textContent = "Mulai Turnamen Baru";
+        resetBtn.classList.remove("confirming");
+      }, 3000);
+      return;
+    }
+    state.players = [];
+    state.format = { type: "bestOf", n: 7, winSets: 1, winGames: 6 };
+    state.schedule = [];
+    state.currentRoundIndex = 0;
+    state.viewedRoundIndex = 0;
+    state.scheduleGenerated = false;
+    state.finished = false;
+    state.playerError = "";
+    confirmingReset = false;
+    resetBtn.textContent = "Mulai Turnamen Baru";
+    resetBtn.classList.remove("confirming");
+    renderAll();
+  };
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
